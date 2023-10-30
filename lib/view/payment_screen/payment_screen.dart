@@ -157,7 +157,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           provider.barcodeController.clear(),
                           provider.rewards = 600,
                           provider.myCount.clear(),
-                          // provider.paymentDone=true,
+                          provider.paymentDone=true,
                           Fluttertoast.showToast(
                             msg:
                                 'Wohoo!! You have been rewarded with ${provider.rewards} super coins!',

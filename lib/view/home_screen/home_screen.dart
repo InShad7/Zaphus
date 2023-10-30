@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import 'package:zaphus/view/utils/color.dart';
 import '../../controller/provider/contoller.dart';
 import '../login_screen/widget/custom_text_field.dart';
 import 'widget/checkout_btn.dart';
@@ -34,7 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (provider.barcodeController.text == '12345') {
+                if (!provider.paymentDone &&
+                    provider.barcodeController.text == '12345') {
                   provider.validationSuccess = true;
 
                   provider.addProductsToProductList();
@@ -42,7 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   provider.validationSuccess = false;
 
                   Fluttertoast.showToast(
-                    msg: 'Invalid barcode',
+                    msg: provider.paymentDone
+                        ? "Barcode expired !!"
+                        : 'Invalid barcode',
                     backgroundColor: Colors.red,
                     gravity: ToastGravity.BOTTOM,
                   );
