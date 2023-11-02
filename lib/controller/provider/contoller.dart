@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zaphus/controller/db/db.dart';
 import 'package:zaphus/view/utils/color.dart';
 
 class ControllerProvider with ChangeNotifier {
@@ -10,12 +11,15 @@ class ControllerProvider with ChangeNotifier {
   TextEditingController barcodeController = TextEditingController();
 
   GlobalKey<FormState> formKey2 = GlobalKey<FormState>();
-  bool validationSuccess = false;
 
+  bool validationSuccess = false;
   bool isEditMode = false;
   bool paymentDone = false;
+  bool productLoaded = false;
 
   List productList = [];
+  List<Map<String, dynamic>>? products = [];
+  List barcodeList = [];
 
   List myCount = [];
 
@@ -23,21 +27,22 @@ class ControllerProvider with ChangeNotifier {
 
   int rewards = 0;
 
-  List<Map<String, dynamic>> products = [
-    {'id': 1, 'name': 'NIKE', 'image': 'assets/nikedp.jpeg', 'rate': '100'},
-    {
-      'id': 2,
-      'name': 'Nike Canvas',
-      'image': 'assets/nikedp2.webp',
-      'rate': '200'
-    },
-    {
-      'id': 3,
-      'name': 'Nike Air',
-      'image': 'assets/nikedp3.webp',
-      'rate': '300'
-    },
-  ];
+  DatabaseManager databaseManager = DatabaseManager();
+  // List<Map<String, dynamic>> products = [
+  //   {'id': 1, 'name': 'NIKE', 'image': 'assets/nikedp.jpeg', 'rate': '100'},
+  //   {
+  //     'id': 2,
+  //     'name': 'Nike Canvas',
+  //     'image': 'assets/nikedp2.webp',
+  //     'rate': '200'
+  //   },
+  //   {
+  //     'id': 3,
+  //     'name': 'Nike Air',
+  //     'image': 'assets/nikedp3.webp',
+  //     'rate': '300'
+  //   },
+  // ];
 
   // Future getProducts() async {
   //   final QuerySnapshot querySnapshot =
@@ -170,6 +175,7 @@ class ControllerProvider with ChangeNotifier {
   }
 
   void getCount({product}) {
+    print(' inside getcount:::::$myCount');
     if (productList.contains(product['id'])) {
       int index = productList.indexOf(product['id']);
       count = myCount[index];
@@ -177,16 +183,33 @@ class ControllerProvider with ChangeNotifier {
   }
 
   // Function to add products to productList
-  void addProductsToProductList() {
+  void addProductsToProductList(List<int> productIDs) {
     productList.clear();
-    for (var product in products) {
-      final productId = product['id'];
+    myCount.clear();
+
+    for (var productId in productIDs) {
       if (!productList.contains(productId)) {
         productList.add(productId);
         myCount.add(1);
+        productLoaded = true;
       }
     }
   }
 
- 
+  Future<void> loadFromDB() async {
+    await databaseManager.initDataBase();
+    List<Map<String, dynamic>>? productDetails =
+        await databaseManager.getProductsForCode(barcodeController.text);
+    products = productDetails;
+    if (productDetails != null) {
+      final productIDs =
+          productDetails.map((product) => product['id'] as int).toList();
+      addProductsToProductList(productIDs);
+      // notifyListeners();
+    }
+  }
+
+  increaseRewards() async {
+    rewards = rewards + 300;
+  }
 }

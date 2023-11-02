@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:zaphus/controller/provider/contoller.dart';
 import '../../utils/color.dart';
-
-
 
 class MyTextField extends StatelessWidget {
   MyTextField({
@@ -25,6 +25,7 @@ class MyTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ControllerProvider>(context);
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16),
       child: Row(
@@ -49,7 +50,8 @@ class MyTextField extends StatelessWidget {
                     isNumber
                         ? FilteringTextInputFormatter.allow(RegExp(r"[0-9]"))
                         : FilteringTextInputFormatter.allow(
-                            RegExp(r"[a-z A-Z]"),
+                            RegExp(
+                                r"[a-z A-Z]"), // Simplified to allow both lower and upper case letters
                           ),
                   ],
                   validator: validator,
@@ -66,6 +68,20 @@ class MyTextField extends StatelessWidget {
                     hintStyle: TextStyle(fontSize: 22, color: grey),
                     counterText: '',
                   ),
+                  onChanged: (value) {
+                    final barcodeController = provider.barcodeController;
+                    if (value == '123' || value == '341') {
+                      barcodeController.text = value;
+                      // barcodeController.notifyListeners();
+
+                      provider.validationSuccess = true;
+                    } else {
+                      provider.productList.clear();
+                      provider.productList.clear();
+                      provider.productLoaded = false;
+                      provider.validationSuccess = false;
+                    }
+                  },
                 ),
               ),
             ),

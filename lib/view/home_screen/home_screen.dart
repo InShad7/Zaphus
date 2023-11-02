@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import 'package:zaphus/view/product_expired/product_expired.dart';
 import 'package:zaphus/view/utils/color.dart';
 import '../../controller/provider/contoller.dart';
 import '../login_screen/widget/custom_text_field.dart';
@@ -19,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ControllerProvider>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Zaphus'),
@@ -35,18 +35,27 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (!provider.paymentDone &&
-                    provider.barcodeController.text == '12345') {
-                  provider.validationSuccess = true;
-
-                  provider.addProductsToProductList();
-                } else {
+                final barcode = provider.barcodeController.text;
+                if (barcode.isEmpty || barcode != '123' && barcode != '341') {
                   provider.validationSuccess = false;
-
                   Fluttertoast.showToast(
-                    msg: provider.paymentDone
-                        ? "Barcode expired !!"
-                        : 'Invalid barcode',
+                    msg: 'Invalid barcode',
+                    backgroundColor: Colors.red,
+                    gravity: ToastGravity.BOTTOM,
+                  );
+                  return;
+                }
+
+                if (!provider.barcodeList.contains(barcode)) {
+                  if (barcode == '123' || barcode == '341') {
+                    provider.validationSuccess = true;
+                    provider.loadFromDB();
+                  } else {
+                    provider.validationSuccess = false;
+                  }
+                } else {
+                  Fluttertoast.showToast(
+                    msg: 'Barcode expired!!',
                     backgroundColor: Colors.red,
                     gravity: ToastGravity.BOTTOM,
                   );
@@ -55,24 +64,24 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text('View products'),
             ),
             Visibility(
-              visible: provider.validationSuccess,
+              visible: provider.validationSuccess &&
+                  provider.barcodeController.text.isNotEmpty,
               child: ListView.builder(
                 itemCount: provider.productList.length,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   final productId = provider.productList[index];
-                  final product = provider.products
+                  final product = provider.products!
                       .firstWhere((product) => product['id'] == productId);
                   return ItemCard(product: product);
                 },
               ),
-            ),
+            )
           ],
         ),
       ),
-      bottomNavigationBar:
-          provider.validationSuccess ? const CheckOutBtn() : null,
+      bottomNavigationBar: provider.productLoaded ? const CheckOutBtn() : null,
     );
   }
 }

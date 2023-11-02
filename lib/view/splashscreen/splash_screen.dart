@@ -33,11 +33,11 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void checkLoggedIn() async {
-    final sharedPrefs = await SharedPreferences.getInstance();
-    bool loggedIn = sharedPrefs.getBool('isLoggedIn') ?? false;
-    setState(() {
-      isloggedIn = loggedIn;
-    });
+    // final sharedPrefs = await SharedPreferences.getInstance();
+    // bool loggedIn = sharedPrefs.getBool('isLoggedIn') ?? false;
+    // setState(() {
+    //   isloggedIn = loggedIn;
+    // });
     if (isloggedIn == true) {
       await Future.delayed(
         const Duration(seconds: 1),
